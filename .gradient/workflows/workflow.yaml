@@ -33,7 +33,7 @@ jobs:
 
   Run:
     resources:
-      instance-type: A100
+      instance-type: C5
     needs:
       - Build
     inputs:
