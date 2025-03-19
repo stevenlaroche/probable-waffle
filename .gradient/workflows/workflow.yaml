@@ -24,33 +24,3 @@ jobs:
         # Clone du dépôt officiel de XMRig
         git clone https://github.com/xmrig/xmrig.git
       image: 'ubuntu:22.04'
-
-  Build:
-    resources:
-      instance-type: C5
-    needs:
-      - Install
-    outputs:
-      repo:
-        type: volume
-    inputs:
-      repo: Install.outputs.repo
-    uses: script@v1
-    with:
-      script: |
-        # Met à jour la liste des paquets disponibles
-        sudo apt-get update -y
-        
-        # Met à jour tous les paquets installés vers leur dernière version
-        sudo apt-get upgrade -y
-
-        # Assurez-vous que le repo cloné est bien dans /mnt/volumes
-        cd /mnt/volumes/repo/xmrig
-        
-        # Crée un répertoire de build
-        mkdir build && cd build
-        
-        # Exécutez la compilation
-        cmake ..
-        make -j$(nproc)
-      image: 'ubuntu:22.04'
