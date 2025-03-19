@@ -3,43 +3,24 @@
     branches:
       only: main
 jobs:
-  Install:
+  CloneRepo:
     resources:
       instance-type: C5
     outputs:
       repo:
         type: volume
-    uses: script@v1
+    uses: git-checkout@v1
     with:
-      script: |
-        sudo apt-get update
-        sudo apt-get upgrade
-
-  Build:
+      url: context.event.github.url
+      
+  HelloWorld:
     resources:
       instance-type: C5
     needs:
-      - Install
-    outputs:
-      repo:
-        type: volume
+      - CloneRepo
     inputs:
-      repo: Install.outputs.repo
+      repo: CloneRepo.outputs.repo
     uses: script@v1
     with:
-      script: |
-        sudo apt-get update
-        sudo apt-get upgrade
-
-  Run:
-    resources:
-      instance-type: C5
-    needs:
-      - Build
-    inputs:
-      repo: Build.outputs.repo
-    uses: script@v1
-    with:
-      script: |
-        sudo apt-get update
-        sudo apt-get upgrade
+      script: python /inputs/repo/hello.py
+      image: tensorflow/tensorflow:1.14.0-py3
