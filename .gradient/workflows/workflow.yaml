@@ -1,14 +1,16 @@
-'on':
+on:
   github:
     branches:
-      only: main
+      only:
+        - main
+
 jobs:
   Install:
     resources:
       instance-type: C5
     outputs:
       xmrig-source:
-        type: volume
+        type: volume  # Changer 'volume' en 'dataset' si nécessaire
     uses: script@v1
     with:
       script: |
@@ -16,12 +18,11 @@ jobs:
         apt-get update && apt-get install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
         # Cloner le dépôt xmrig
         git clone https://github.com/xmrig/xmrig.git /xmrig
-        # Copier les sources dans le volume de sortie
+        # Copier les sources dans l'output
         cp -r /xmrig /outputs/xmrig-source
 
   Build:
-    needs:
-      - Install
+    needs: Install
     resources:
       instance-type: C5
     inputs:
@@ -29,7 +30,7 @@ jobs:
         type: volume
     outputs:
       xmrig-build:
-        type: volume
+        type: dataset
     uses: script@v1
     with:
       script: |
@@ -41,13 +42,12 @@ jobs:
         # Générer les fichiers de build avec cmake
         cmake ..
         # Compiler xmrig
-        make
-        # Copier les fichiers compilés dans le volume de sortie
-        cp -r * /outputs/xmrig-build/
+        make -j$(nproc)  # Optimisation de la compilation
+        # Copier le binaire compilé
+        cp xmrig /outputs/xmrig-build/
 
   Run:
-    needs:
-      - Build
+    needs: Build
     resources:
       instance-type: A100
     inputs:
@@ -56,8 +56,9 @@ jobs:
     uses: script@v1
     with:
       script: |
-        # Copier les fichiers compilés dans le répertoire de travail
-        cp -r /inputs/xmrig-build/* /xmrig
+        # Copier le binaire dans le répertoire de travail
+        cp /inputs/xmrig-build/xmrig /xmrig
+        chmod +x /xmrig/xmrig
         cd /xmrig
         # Exécuter xmrig
         ./xmrig --donate-level 1 -o pool.supportxmr.com:3333 -u VotreAdresseMonero -p x
