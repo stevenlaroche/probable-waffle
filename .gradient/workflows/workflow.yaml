@@ -1,7 +1,7 @@
-on:
-  push:
+'on':
+  github:
     branches:
-      - main
+      only: main
 jobs:
   Install:
     resources:
