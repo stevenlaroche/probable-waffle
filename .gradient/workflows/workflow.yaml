@@ -12,6 +12,6 @@ jobs:
     uses: script@v1
     with:
       script: |
-        sudo apt-get update
-        sudo apt-get upgrade
-      image: paperspace/gradient-sdk
+        apt-get update
+        apt-get upgrade
+      image: 'ubuntu:22.04'
