@@ -3,11 +3,6 @@
     branches:
       only: main
 jobs:
-'on':
-  github:
-    branches:
-      only: main
-jobs:
   Install:
     resources:
       instance-type: C5
