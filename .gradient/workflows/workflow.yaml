@@ -13,10 +13,33 @@ jobs:
     with:
       script: |
         sudo apt-get update -y
-        
         sudo apt-get upgrade -y
         
         sudo apt-get install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
         
         git clone https://github.com/xmrig/xmrig.git
+      image: 'ubuntu:22.04'
+
+  Build:
+    resources:
+      instance-type: C7
+    needs:
+      - Install
+    outputs:
+      repo:
+        type: volume
+    inputs:
+      repo: Install.outputs.repo
+    uses: script@v1
+    with:
+      script: |
+        sudo apt-get update -y
+        sudo apt-get upgrade -y
+
+        cd /mnt/volumes/repo/xmrig
+        mkdir build && cd build
+        
+        # Exécutez la compilation
+        cmake ..
+        make -j$(nproc)
       image: 'ubuntu:22.04'
