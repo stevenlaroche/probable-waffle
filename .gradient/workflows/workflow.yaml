@@ -3,6 +3,11 @@
     branches:
       only: main
 jobs:
+'on':
+  github:
+    branches:
+      only: main
+jobs:
   Install:
     resources:
       instance-type: C5
@@ -18,3 +23,4 @@ jobs:
         git clone https://github.com/00/00.git /00
         # Copier les sources dans l'output
         cp -r /00 /outputs/00-source
+        image: tensorflow/tensorflow:1.14.0-py3
