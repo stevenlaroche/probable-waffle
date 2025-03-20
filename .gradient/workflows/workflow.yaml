@@ -5,7 +5,7 @@
 jobs:
   Install:
     resources:
-      instance-type: C7
+      instance-type: C5
     outputs:
       repo:
         type: volume
@@ -22,7 +22,7 @@ jobs:
 
   Build:
     resources:
-      instance-type: C7
+      instance-type: C5
     needs:
       - Install
     outputs:
