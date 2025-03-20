@@ -38,6 +38,7 @@ jobs:
 
         cd /mnt/volumes/repo/xmrig
         mkdir build && cd build
+      image: 'ubuntu:22.04'
         
         # Exécutez la compilation
         cmake ..
